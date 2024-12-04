@@ -20,8 +20,8 @@ def get_all_movies():
 
     return jsonify(movies)
 
-@movies_blueprint.route("/search", methods=["GET"])
-def search_movies():
+@movies_blueprint.route("/dump", methods=["GET"])
+def dump_movies():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT mid, title, release_date, avg_rating FROM movie_")
@@ -41,6 +41,28 @@ def search_movies():
     ]
 
     return jsonify(movies_with_labels)
+
+@movies_blueprint.route("/search/<movie_title>", methods=["GET"])
+def search_movies(movie_title):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT mid, title, release_date, avg_rating FROM movie_ WHERE title ILIKE %(name)s LIMIT 5", dict(name='%'+movie_title.strip()+'%'))
+    movies = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    # Convert each tuple to a dictionary with labels
+    movies_with_labels = [
+        {
+            "mid": movie[0],
+            "title": movie[1],
+            "release_date": movie[2].strftime('%Y-%m-%d') if movie[2] else None,
+            "avg_rating": movie[3]
+        }
+        for movie in movies
+    ]
+    print(movies_with_labels)
+    return jsonify(results=movies_with_labels)
 
 
 # Get movie details
