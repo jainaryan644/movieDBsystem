@@ -5,11 +5,15 @@
       <router-link to="/" class="home-icon">fIMDB</router-link>
     </div>
     <div class="nav-right">
-      <!-- Login/Logout Button -->
-      <button @click="handleAuthAction">
-        {{ isLoggedIn ? "Logout" : "Login" }}
-      </button>
-      <p> {{ isLoggedIn ? "Username" : "" }} </p>
+      <div v-if="isLoggedIn">
+        <!-- Display Welcome Message, Username, and Logout Button -->
+        <span>Welcome, {{ username }} | </span>
+        <button @click="handleLogout">Logout</button>
+      </div>
+      <div v-else>
+        <!-- Login Button -->
+        <button @click="handleLogin">Login</button>
+      </div>
     </div>
   </nav>
 </template>
@@ -18,20 +22,49 @@
 export default {
   data() {
     return {
-      isLoggedIn: false, // Replace with your authentication logic
+      isLoggedIn: !!localStorage.getItem("userId"), // Check login status from localStorage
+      username: "", // Store the username
     };
   },
   methods: {
-    handleAuthAction() {
-      if (this.isLoggedIn) {
-        // Perform logout logic
-        this.isLoggedIn = false; // Update authentication status
-        this.$router.push("/login"); // Redirect to login page
-      } else {
-        // Redirect to login page
-        this.$router.push("/login");
+    handleLogin() {
+      // Redirect to the login page
+      this.$router.push("/login");
+    },
+    handleLogout() {
+      // Perform logout logic
+      localStorage.removeItem("userId"); // Remove stored userId
+      this.isLoggedIn = false; // Update login status
+      this.username = ""; // Clear the username
+    },
+    async fetchUsername() {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          // Fetch username from the backend
+          const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            this.username = data.username;
+            this.isLoggedIn = true;
+          } else {
+            // If the response isn't OK, clear login status
+            this.isLoggedIn = false;
+            this.username = "";
+          }
+        } else {
+          // If there's no userId in localStorage
+          this.isLoggedIn = false;
+          this.username = "";
+        }
+      } catch (error) {
+        console.error("Failed to fetch username:", error);
+        this.isLoggedIn = false;
       }
     },
+  },
+  mounted() {
+    this.fetchUsername(); // Fetch username when the component mounts
   },
 };
 </script>
