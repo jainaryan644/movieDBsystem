@@ -1,5 +1,6 @@
 <template>
     <div class="movie-page">
+        <NavBar />
         <MovieDetails :movie="movie" />
         <ReviewSection :reviews="reviews" @new-review="addReview" />
     </div>
@@ -8,6 +9,7 @@
 <script>
     import MovieDetails from "./MovieDetails.vue";
     import ReviewSection from "./ReviewSection.vue";
+    import NavBar from "./NavBar.vue";
   
     export default {
         data() {
