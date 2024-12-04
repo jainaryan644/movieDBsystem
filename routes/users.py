@@ -4,9 +4,15 @@ import hashlib
 
 users_blueprint = Blueprint("users", __name__)
 
+# Test route
+@users_blueprint.route("/")
+def users_home():
+    return "users route works!"
+
 # Register a new user
 @users_blueprint.route("/register", methods=["POST"])
 def register_user():
+
     data = request.get_json()
     password_hash = hashlib.sha256(data["password"].encode()).hexdigest()
 
@@ -23,8 +29,11 @@ def register_user():
     return jsonify({"message": "User registered successfully!"}), 201
 
 # Authenticate a user
-@users_blueprint.route("/login", methods=["POST"])
+@users_blueprint.route("/login", methods=["POST", "GET"])
 def login_user():
+    if request.method == "OPTIONS":
+        # Handle preflight request
+        return jsonify({"message": "Preflight request successful"}), 200
     data = request.get_json()
     password_hash = hashlib.sha256(data["password"].encode()).hexdigest()
 
@@ -39,3 +48,18 @@ def login_user():
         return jsonify({"uid": user[0]})
     else:
         return jsonify({"message": "Invalid credentials"}), 401
+
+# Get user details by ID
+@users_blueprint.route("/<int:user_id>", methods=["GET"])
+def get_user_details(user_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT username FROM user_ WHERE uid = %s", (user_id,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if user:
+        return jsonify({"username": user[0]})
+    else:
+        return jsonify({"message": "User not found"}), 404
