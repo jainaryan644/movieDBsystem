@@ -3,6 +3,11 @@ from db_connection import get_db_connection
 
 reviews_blueprint = Blueprint("reviews", __name__)
 
+# Test route
+@reviews_blueprint.route("/")
+def reviews_home():
+    return "reviews route works!"
+
 # Add a new review
 @reviews_blueprint.route("/add", methods=["POST"])
 def add_review():
