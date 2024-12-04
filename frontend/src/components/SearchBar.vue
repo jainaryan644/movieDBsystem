@@ -2,7 +2,7 @@
   <div class="search-bar">
     <input type="text" v-model="query" placeholder="Search for movie..." @input="searchMovies" />
     <ul v-if="results.length">
-      <li v-for="movie in results" :key="movie.title">{{ movie.title }}</li>
+      <li v-for="movie in results" :key="movie.title"><router-link v-bind:to="'/movie/' + movie.mid">{{ movie.title }}</router-link></li>
     </ul>
   </div>
 </template>
