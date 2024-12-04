@@ -18,6 +18,7 @@ def add_review():
         INSERT INTO review_ (uid, mid, comment, rating, date, vote)
         VALUES (%s, %s, %s, %s, CURRENT_DATE, 0)
     """, (data["uid"], data["mid"], data["comment"], data["rating"]))
+    cur.execute("UPDATE movie_ SET rating_sum = rating_sum + %s, num_rating = num_rating + 1 WHERE mid = %s", (data["rating"], data["mid"]))
     conn.commit()
     cur.close()
     conn.close()
