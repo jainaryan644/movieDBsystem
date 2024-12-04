@@ -61,7 +61,6 @@ def search_movies(movie_title):
         }
         for movie in movies
     ]
-    print(movies_with_labels)
     return jsonify(results=movies_with_labels)
 
 
