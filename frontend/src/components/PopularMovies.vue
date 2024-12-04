@@ -14,6 +14,8 @@ export default {
       topMovies: [], // Populate this with API data
     };
   },
+  methods:
+  
   mounted() {
     // Fetch top 5 movies here
   },

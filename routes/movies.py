@@ -10,17 +10,6 @@ def movies_home():
 
 # Get all movies
 @movies_blueprint.route("/", methods=["GET"])
-def get_all_movies():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT mid, title, release_date, avg_rating FROM movie_")
-    movies = cur.fetchall()
-    cur.close()
-    conn.close()
-
-    return jsonify(movies)
-
-@movies_blueprint.route("/dump", methods=["GET"])
 def dump_movies():
     conn = get_db_connection()
     cur = conn.cursor()
