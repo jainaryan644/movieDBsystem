@@ -22,7 +22,8 @@ def get_db_connection():
         print(f"Error connecting to database: {e}")
         raise e
 
-cur = get_db_connection().cursor()
+conn = get_db_connection()
+cur = conn.cursor()
 
 
 # Every table from the ER Diagram is created
@@ -94,7 +95,7 @@ def dropAllTables():
     cur.execute("DROP TABLE person_")
     cur.execute("DROP TABLE cast_")
     cur.execute("DROP TABLE crew_")
-    cur.execute("DROP TABLE producer_")
+    cur.execute("DROP TABLE director_")
 
 # Handles hashing as well as join_date within this function.
 def addUser(username, password, bio=""):
