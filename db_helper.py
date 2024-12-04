@@ -51,7 +51,7 @@ def initializeDatabaseTables():
                 release_date DATE NOT NULL, 
                 plot TEXT NOT NULL,  
                 num_reviews INT NOT NULL,
-                avg_rating FLOAT NOT NULL
+                rating_sum INT NOT NULL,
     );""")
     cur.execute("""CREATE TABLE genre_ (
                 genre_name TEXT PRIMARY KEY,
@@ -153,7 +153,7 @@ def readMoviesFromCSV():
                 movie_plot = row[9]
 
                 # Insert movie into the database
-                insert_movie_query = """INSERT INTO movie_ (title, release_date, plot, avg_rating, num_reviews)
+                insert_movie_query = """INSERT INTO movie_ (title, release_date, plot, rating_sum, num_reviews)
                                         VALUES (%s, %s, %s, 0, 0)"""
                 cur.execute(insert_movie_query, (movie_title, movie_released_date, movie_plot))
                 conn.commit()
@@ -170,11 +170,7 @@ def leaveReview(uid, mid, rating, comment):
     insert_review_query = """INSERT INTO review_(uid, mid, rating, comment, date, vote)
                             VALUES(%s, %s, %s, %s, %s, 0)"""
     cur.execute(insert_review_query, (uid,mid,rating,comment,date.today()))
-    cur.execute("SELECT num_reviews, avg_rating FROM movie_ WHERE mid = %s", (mid,))
-    nRev, avgRate = cur.fetchall()[0]
-    newAvg = ((avgRate*nRev)+rating)/(nRev+1)
-    update_movie_rating_query = """UPDATE movie_ SET avg_rating = %s, num_reviews = num_reviews+1 WHERE mid = %s"""
-    cur.execute(update_movie_rating_query,(newAvg,mid))
+    cur.execture("""UPDATE movie_ SET rating_sum = rating_sum + %s, num_reviews = num_reviews+1 WHERE mid = %s""",(rating,mid))
 
 def getUUID(value, valname1, valname2, table):
     query = sql.SQL("SELECT {valname1} FROM {table} WHERE {valname2} = {value}").format(table=sql.Identifier(table), valname1=sql.Identifier(valname1), valname2=sql.Identifier(valname2), value=value)
