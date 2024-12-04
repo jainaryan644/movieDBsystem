@@ -40,4 +40,15 @@ def get_reviews_for_movie(movie_id):
     cur.close()
     conn.close()
 
-    return jsonify(reviews)
+    reviews_with_labels = [
+        {
+            "rid": review[0],
+            "comment": review[1],
+            "rating": review[2].strftime('%Y-%m-%d') if review[2] else None,
+            "date": review[3],
+            "vote": review[4],
+            "username": review[5],
+        }
+        for review in reviews
+    ]
+    return jsonify(results=reviews_with_labels)
