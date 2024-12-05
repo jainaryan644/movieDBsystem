@@ -22,7 +22,6 @@
 
 <script>
 import NavBar from "./NavBar.vue";
-import CreateProfile from "./CreateProfile.vue"
 export default {
   data() {
     return {
@@ -33,7 +32,6 @@ export default {
   },
   components: {
     NavBar,
-    CreateProfile,
   },
   methods: {
     async handleLogin() {

@@ -14,14 +14,14 @@
         <button type="submit">Submit</button>
       </form>
       <p v-else>
-        Please <router-link to="/login">Log In</router-link> To Leave a Review
+        Please <router-link to="/login">Log In</router-link> to leave a review.
       </p>
   
       <!-- Reviews List -->
-      <ul style="list-style-type: none; padding: 0;">
-        <li v-for="review in reviews" :key="review.id">
+      <ul v-if="reviews.length > 0" style="list-style-type: none; padding: 0;">
+        <li v-for="review in reviews" :key="review.rid">
           <div>
-            <b>{{ review.username }}</b> 
+            <b>{{ review.username }}</b>
             <span class="simpleBox">
               <span v-for="n in 5" :key="n" :class="{ yellowStar: n <= review.rating }">
                 ★
@@ -29,8 +29,10 @@
             </span>
           </div>
           <blockquote>{{ review.comment }}</blockquote>
+          <p class="review-date">{{ review.date }}</p>
         </li>
       </ul>
+      <p v-else>No reviews yet. Be the first to review!</p>
     </div>
   </template>
   
@@ -45,42 +47,23 @@
     data() {
       return {
         isLoggedIn: !!localStorage.getItem("userId"),
-        username: "",
         newReview: {
           text: "",
           rating: 0,
         },
-        reviews: [],
+        reviews: [], // List of reviews
       };
     },
     mounted() {
-      this.fetchReviews(); // Fetch reviews when component is mounted
-      this.fetchUsername(); // Fetch username if logged in
+      this.fetchReviews(); // Fetch reviews on component mount
     },
     methods: {
-      async fetchUsername() {
-        try {
-          const userId = localStorage.getItem("userId");
-          if (userId) {
-            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
-            if (response.ok) {
-              const data = await response.json();
-              this.username = data.username;
-              this.isLoggedIn = true;
-            } else {
-              this.isLoggedIn = false;
-              this.username = "";
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch username:", error);
-        }
-      },
       async fetchReviews() {
         try {
-          const response = await fetch(`http://127.0.0.1:5000/reviews/${this.movieId}`);
+          const response = await fetch(`http://127.0.0.1:5000/reviews/movie/${this.movieId}`);
           if (response.ok) {
-            this.reviews = await response.json();
+            const reviewsData = await response.json();
+            this.reviews = reviewsData; // Assign fetched reviews to the data property
           } else {
             console.error("Failed to fetch reviews.");
           }
@@ -96,7 +79,7 @@
             return;
           }
   
-          const response = await fetch(`http://127.0.0.1:5000/reviews`, {
+          const response = await fetch(`http://127.0.0.1:5000/reviews/add`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -110,13 +93,11 @@
           });
   
           if (response.ok) {
-            // Add new review to list dynamically
-            const addedReview = await response.json();
-            this.reviews.push(addedReview);
-  
-            // Reset form
-            this.newReview.text = "";
-            this.newReview.rating = 0;
+            const newReview = await response.json();
+            this.reviews.push(newReview); // Dynamically add the new review to the list
+            this.newReview.text = ""; // Clear the text box
+            this.newReview.rating = 0; // Reset the rating
+            this.fetchReviews(); // Refresh reviews to ensure consistency
           } else {
             console.error("Failed to submit review.");
           }
@@ -129,6 +110,11 @@
   </script>
   
   <style scoped>
+  .review-date {
+    font-size: 0.9rem;
+    color: gray;
+  }
+  
   .simpleBox {
     display: inline-block;
     margin-left: 0.5rem;

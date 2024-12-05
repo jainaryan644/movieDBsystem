@@ -98,7 +98,7 @@ def get_movie_details(movie_id):
         return jsonify({"message": "Movie not found"}), 404
 
     # Compute average rating safely
-    avg_rating = movie[4] / movie[5] if movie[5] else 0
+    avg_rating = round(movie[4] / movie[5],2) if movie[5] else 0
 
     output_movie = {
         "mid": movie[0],
