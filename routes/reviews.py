@@ -78,13 +78,14 @@ def get_reviews_for_user(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT r.rid, r.comment, r.rating, r.date, m.title AS movie_title
+        SELECT r.rid, r.comment, r.rating, r.date, m.title AS movie_title, m.mid AS movie_mid
         FROM review_ r
         JOIN movie_ m ON r.mid = m.mid
         WHERE r.uid = %s
         ORDER BY r.date DESC
     """, (user_id,))
     reviews = cur.fetchall()
+    print(reviews)
     cur.close()
     conn.close()
 
@@ -95,10 +96,12 @@ def get_reviews_for_user(user_id):
             "rating": review[2],
             "date": review[3].strftime('%Y-%m-%d') if review[3] else None,
             "movie_title": review[4],
+            "movie_mid": review[5],
         }
         for review in reviews
     ]
-    return jsonify(reviews_with_labels)
+    print(reviews_with_labels)
+    return jsonify(reviews_with_labels), 201
 
 
 @reviews_blueprint.route("/movie/<int:movie_id>", methods=["GET"])

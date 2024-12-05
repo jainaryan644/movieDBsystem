@@ -12,17 +12,23 @@
             <p>{{ movie.plot }}</p>
         </div>
         <hr>
-        <p>Released: {{ movie.release_date }}</p>
+        <p>Released: {{ formattedDate(movie.release_date) }}</p>
     </div>
 </template>
   
 <script>
+    import moment from 'moment';
     export default {
         props: ["movie"],
         data() {
             return {
                 avg_rating_rounded: Math.round(this.movie.avg_rating),
             };
+        },
+        computed: {
+            formattedDate(){
+                return (v) => {return moment(v).format('MMMM d, yyyy');};
+            }
         },
         mounted() {
 
