@@ -49,17 +49,20 @@ def login_user():
     else:
         return jsonify({"message": "Invalid credentials"}), 401
 
-# Get user details by ID
 @users_blueprint.route("/<int:user_id>", methods=["GET"])
 def get_user_details(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT username FROM user_ WHERE uid = %s", (user_id,))
+    cur.execute("SELECT username, bio FROM user_ WHERE uid = %s", (user_id,))
     user = cur.fetchone()
     cur.close()
     conn.close()
 
     if user:
-        return jsonify({"username": user[0]})
+        return jsonify({
+            "username": user[0],
+            "bio": user[1]
+        })
     else:
         return jsonify({"message": "User not found"}), 404
+

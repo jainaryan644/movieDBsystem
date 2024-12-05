@@ -1,0 +1,111 @@
+<template>
+    <div class="user-profile-page">
+      <!-- Include Navbar -->
+      <NavBar />
+      <div class="profile-container">
+        <h1>User: {{ username }}</h1>
+        <h2>Bio</h2>
+        <p>{{ userBio }}</p>
+        <h2>Reviews</h2>
+        <ul style="list-style-type: none; padding: 0;">
+          <li v-for="review in reviews" :key="review.rid">
+            <div>
+              <b>{{ review.movieTitle }}</b>
+            </div>
+            <blockquote>
+              <p>{{ review.comment }}</p>
+              <div>
+                <span class="simpleBox">
+                  <span
+                    v-for="n in 5"
+                    :key="n"
+                    :class="{ yellowStar: n <= review.rating }"
+                  >
+                    ★
+                  </span>
+                </span>
+              </div>
+            </blockquote>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </template>
+  
+  <script>
+  import NavBar from "./NavBar.vue";
+  
+  export default {
+    components: {
+      NavBar,
+    },
+    data() {
+      return {
+        username: "",
+        userBio: "",
+        reviews: [],
+      };
+    },
+    async mounted() {
+      const userId = localStorage.getItem("userId");
+  
+      // Fetch username and bio
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          this.username = data.username;
+          this.userBio = data.bio;
+        } else {
+          console.error("Failed to fetch user details");
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+  
+      // Fetch user reviews
+      try {
+        const reviewsResponse = await fetch(
+          `http://127.0.0.1:5000/reviews/user/${userId}`
+        );
+        if (reviewsResponse.ok) {
+          const reviewsData = await reviewsResponse.json();
+          this.reviews = reviewsData.results;
+        } else {
+          console.error("Failed to fetch user reviews");
+        }
+      } catch (error) {
+        console.error("Error fetching user reviews:", error);
+      }
+    },
+  };
+  </script>
+  
+  <style scoped>
+  .user-profile-page {
+    padding: 1rem;
+  }
+  
+  .profile-container {
+    margin: 2rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .simpleBox {
+    display: inline-block;
+  }
+  
+  .yellowStar {
+    color: gold;
+  }
+  </style>
+  

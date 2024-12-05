@@ -25,18 +25,18 @@ def add_review():
 
     return jsonify({"message": "Review added successfully!"}), 201
 
-# Get reviews for a movie
-@reviews_blueprint.route("/movie/<int:movie_id>", methods=["GET"])
-def get_reviews_for_movie(movie_id):
+# Get reviews for a specific user
+@reviews_blueprint.route("/user/<int:user_id>", methods=["GET"])
+def get_reviews_for_user(user_id):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT r.rid, r.comment, r.rating, r.date, r.vote, u.username
+        SELECT r.rid, r.comment, r.rating, r.date, m.title AS movie_title
         FROM review_ r
-        JOIN user_ u ON r.uid = u.uid
-        WHERE r.mid = %s
+        JOIN movie_ m ON r.mid = m.mid
+        WHERE r.uid = %s
         ORDER BY r.date DESC
-    """, (movie_id,))
+    """, (user_id,))
     reviews = cur.fetchall()
     cur.close()
     conn.close()
@@ -45,11 +45,10 @@ def get_reviews_for_movie(movie_id):
         {
             "rid": review[0],
             "comment": review[1],
-            "rating": review[2].strftime('%Y-%m-%d') if review[2] else None,
-            "date": review[3],
-            "vote": review[4],
-            "username": review[5],
+            "rating": review[2],
+            "date": review[3].strftime('%Y-%m-%d') if review[3] else None,
+            "movie_title": review[4],
         }
         for review in reviews
     ]
-    return jsonify(results=reviews_with_labels)
+    return jsonify(reviews_with_labels)

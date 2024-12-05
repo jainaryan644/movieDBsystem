@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "../components/HomePage.vue";
 import LoginPage from "../components/LoginPage.vue";
 import MoviePage from "../components/MoviePage.vue";
+import UserProfile from "../components/UserProfile.vue"; 
 
 const routes = [
   {
@@ -18,6 +19,11 @@ const routes = [
     path: "/movie/:mid",
     name: "Movie",
     component: MoviePage,
+  },
+  {
+    path: "/profile",
+    name: "UserProfile",
+    component: UserProfile,
   },
 ];
 

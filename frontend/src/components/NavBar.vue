@@ -6,8 +6,12 @@
     </div>
     <div class="nav-right">
       <div v-if="isLoggedIn">
-        <!-- Display Welcome Message, Username, and Logout Button -->
-        <span>Welcome, {{ username }} | </span>
+        <!-- Display Welcome Message, Username (as a Link), and Logout Button -->
+        <span>
+          Welcome, 
+          <router-link to="/profile" class="username-link">{{ username }}</router-link> 
+          | 
+        </span>
         <button @click="handleLogout">Logout</button>
       </div>
       <div v-else>
@@ -100,5 +104,15 @@ export default {
 .nav-right button:hover {
   background-color: #45a049;
   color: white;
+}
+
+.username-link {
+  text-decoration: underline;
+  color: white;
+  cursor: pointer;
+}
+
+.username-link:hover {
+  color: #ffcc00; /* Change hover color for username link */
 }
 </style>
