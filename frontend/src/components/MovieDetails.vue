@@ -6,11 +6,12 @@
             <span v-for="n in 5" :key="n" :class="{'yellowStar':n <= avg_rating_rounded}">★</span>
             &nbsp;<span> {{ movie.avg_rating }}</span> <!--&nbsp; adds the spacing between the stars and the numerical rating-->
         </span>
-        <div class="simpleBox">
+        <hr>
+        <div>
             <h3>Plot</h3>
             <p>{{ movie.plot }}</p>
         </div>
-        
+        <hr>
         <p>Released: {{ movie.release_date }}</p>
     </div>
 </template>
