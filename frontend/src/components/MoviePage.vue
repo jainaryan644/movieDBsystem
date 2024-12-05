@@ -1,65 +1,48 @@
 <template>
-    <div class="movie-page">
-        <NavBar />
-        <MovieDetails :movie="movie" />
-        <ReviewSection :reviews="reviews" @new-review="addReview" />
+    <div v-if="movie">
+      <h1>{{ movie.title }}</h1>
+      <p>Released: {{ movie.release_date }}</p>
+      <p>Rating: {{ movie.avg_rating }}</p>
+      <ReviewSection :movieId="movie.mid" />
     </div>
-</template>
+    <div v-else>
+      <p>Loading movie details...</p>
+    </div>
+  </template>
   
-<script>
-    import MovieDetails from "./MovieDetails.vue";
-    import ReviewSection from "./ReviewSection.vue";
-    import NavBar from "./NavBar.vue";
+  <script>
+  import ReviewSection from "./ReviewSection.vue";
+  import axios from "axios";
   
-    export default {
-        data() {
-            return {
-                movie: {title: 'lorem', avg_rating:0, description:'i'}, // Movie data to be passed as props
-                reviews: [{rating:2, text:'0', username:'a', uid:-1}], // List of reviews
-                error: "",
-                umid:this.$router.params.mid
-            };
-        },
-        components: {
-            MovieDetails,
-            ReviewSection,
-            NavBar
-        },
-        methods: {
-            async getMovieAndReviews() {
-                const movieResponse = await fetch(`http://127.0.0.1:5000/movies/${this.umid}`);
-                const movieData = await movieResponse.json();
-                if (this.json.stringify(movieData) === "{}"){this.$router.push("/");}
-                this.movie = movieData;
-                const reviewsResponse = await fetch(`http://127.0.0.1:5000/reviews/movie/${this.umid}`);
-                const reviewsData = await reviewsResponse.json();
-                this.reviews = reviewsData.results;
-            },
-            async addReview(newReview) {
-                const pushReviewResponse = await fetch(`http://127.0.0.1:5000/reviews/add`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        uid: localStorage.getItem("userId"),
-                        mid: this.movie.mid,
-                        comment: newReview.comment,
-                        rating: newReview.rating,
-                    }),
-                });
-                if (!pushReviewResponse.ok) {
-                    const errorData = await pushReviewResponse.json();
-                    this.error = errorData.message || "Login failed. Please try again.";
-                    return;
-                }
-                //const pushReviewData = await pushReviewResponse.json();
-                this.getMovieAndReviews();
-            },
-        },
-        mounted() {
-            this.getMovieAndReviews(); // Populate the movie data and list of reviews
-        },
-    };
-</script>
+  export default {
+    components: {
+      ReviewSection,
+    },
+    data() {
+      return {
+        movie: null, // Movie details
+      };
+    },
+    mounted() {
+      const movieId = this.$route.params.mid; // Get movie ID from route
+      if (movieId) {
+        this.fetchMovieDetails(movieId);
+      }
+    },
+    methods: {
+      async fetchMovieDetails(movieId) {
+        try {
+          const response = await axios.get(`http://127.0.0.1:5000/movies/${movieId}`);
+          this.movie = response.data;
+        } catch (error) {
+          console.error("Error fetching movie details:", error);
+        }
+      },
+    },
+  };
+  </script>
+  
+  <style scoped>
+  /* Add any specific styles here */
+  </style>
   
