@@ -31,6 +31,7 @@
           </div>
           <blockquote>{{ review.comment }}</blockquote>
           <p class="review-date">{{ review.date }}</p>
+          <hr>
         </li>
       </ul>
       <p v-else>No reviews yet. Be the first to review!</p>
