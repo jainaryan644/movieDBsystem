@@ -8,6 +8,22 @@ reviews_blueprint = Blueprint("reviews", __name__)
 def reviews_home():
     return "reviews route works!"
 
+# This is a one-off to make the interface cleaner after a user has already reviewed a movie
+@reviews_blueprint.route("/validate_review/<int:user_id>/<int:movie_id>") 
+def check_already_reviewed(user_id, movie_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Check if the user has already reviewed this movie
+    cur.execute("SELECT 1 FROM review_ WHERE uid = %s AND mid = %s", (user_id, movie_id))
+    existing_review = cur.fetchone()
+
+    if existing_review:
+        cur.close()
+        conn.close()
+        return jsonify({"result": True}), 200
+    return jsonify({"result": False}), 200
+
 @reviews_blueprint.route("/add", methods=["POST"])
 def add_review():
     data = request.get_json()
