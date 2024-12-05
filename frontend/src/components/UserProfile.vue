@@ -1,6 +1,5 @@
 <template>
     <div class="user-profile-page">
-      <!-- Include Navbar -->
       <NavBar />
       <div class="profile-container">
         <h1>User: {{ username }}</h1>

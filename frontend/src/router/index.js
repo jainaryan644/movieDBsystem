@@ -3,6 +3,8 @@ import HomePage from "../components/HomePage.vue";
 import LoginPage from "../components/LoginPage.vue";
 import MoviePage from "../components/MoviePage.vue";
 import UserProfile from "../components/UserProfile.vue"; 
+import CreateProfile from "@/components/CreateProfile.vue";
+
 
 const routes = [
   {
@@ -24,6 +26,11 @@ const routes = [
     path: "/profile",
     name: "UserProfile",
     component: UserProfile,
+  },
+  {
+    path: "/create-profile",
+    name: "CreateProfile",
+    component: CreateProfile,
   },
 ];
 
