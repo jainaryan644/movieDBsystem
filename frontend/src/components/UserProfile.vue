@@ -2,14 +2,15 @@
     <div class="user-profile-page">
       <NavBar />
       <div class="profile-container">
-        <h1>User: {{ username }}</h1>
+        <h1>{{ username }}</h1>
         <h2>Bio</h2>
         <p>{{ userBio }}</p>
         <h2>Reviews</h2>
-        <ul style="list-style-type: none; padding: 0;">
+        <ul v-if="reviews.length > 0" style="list-style-type: none; padding: 0;">
           <li v-for="review in reviews" :key="review.rid">
+            <hr>
             <div>
-              <b>{{ review.movieTitle }}</b>
+              <b><router-link v-bind:to="'/movie/' + review.movie_mid">{{ review.movie_title }}</router-link></b>
             </div>
             <blockquote>
               <p>{{ review.comment }}</p>
@@ -25,7 +26,9 @@
                 </span>
               </div>
             </blockquote>
+            <p class="review-date">{{ review.date }}</p>
           </li>
+          <hr>
         </ul>
       </div>
     </div>
@@ -45,42 +48,59 @@
         reviews: [],
       };
     },
+    methods: {
+      async getUserDetails(){
+        const userId = localStorage.getItem("userId");
+  
+        // Fetch username and bio
+        try {
+          const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            this.username = data.username;
+            this.userBio = data.bio;
+          } else {
+            console.error("Failed to fetch user details");
+          }
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      },
+      async getUserReviews(){
+        const userId = localStorage.getItem("userId");
+
+        // Fetch user reviews
+        try {
+          const reviewsResponse = await fetch(
+            `http://127.0.0.1:5000/reviews/user/${userId}`
+          );
+          if (reviewsResponse.ok) {
+            const reviewsData = await reviewsResponse.json();
+            console.log(reviewsData);
+            this.reviews = reviewsData;
+          } else {
+            console.error("Failed to fetch user reviews");
+          }
+        } catch (error) {
+          console.error("Error fetching user reviews:", error);
+        }
+      }
+    },
     async mounted() {
-      const userId = localStorage.getItem("userId");
+      this.getUserDetails();
+      this.getUserReviews();
   
-      // Fetch username and bio
-      try {
-        const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
-        if (response.ok) {
-          const data = await response.json();
-          this.username = data.username;
-          this.userBio = data.bio;
-        } else {
-          console.error("Failed to fetch user details");
-        }
-      } catch (error) {
-        console.error("Error fetching user details:", error);
-      }
-  
-      // Fetch user reviews
-      try {
-        const reviewsResponse = await fetch(
-          `http://127.0.0.1:5000/reviews/user/${userId}`
-        );
-        if (reviewsResponse.ok) {
-          const reviewsData = await reviewsResponse.json();
-          this.reviews = reviewsData.results;
-        } else {
-          console.error("Failed to fetch user reviews");
-        }
-      } catch (error) {
-        console.error("Error fetching user reviews:", error);
-      }
+      
     },
   };
   </script>
   
   <style scoped>
+  .review-date {
+    font-size: 0.9rem;
+    color: gray;
+  }
+
   .user-profile-page {
     padding: 1rem;
   }
