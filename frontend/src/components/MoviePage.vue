@@ -1,4 +1,5 @@
 <template>
+    <NavBar />
     <div v-if="movie">
       <h1>{{ movie.title }}</h1>
       <p>Released: {{ movie.release_date }}</p>
@@ -12,11 +13,13 @@
   
   <script>
   import ReviewSection from "./ReviewSection.vue";
+  import NavBar from "./NavBar.vue";
   import axios from "axios";
   
   export default {
     components: {
       ReviewSection,
+      NavBar,
     },
     data() {
       return {
