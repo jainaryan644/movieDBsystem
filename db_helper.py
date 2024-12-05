@@ -51,7 +51,7 @@ def initializeDatabaseTables():
                 release_date DATE NOT NULL, 
                 plot TEXT NOT NULL,  
                 num_reviews INT NOT NULL,
-                rating_sum INT NOT NULL,
+                rating_sum INT NOT NULL
     );""")
     cur.execute("""CREATE TABLE genre_ (
                 genre_name TEXT PRIMARY KEY,

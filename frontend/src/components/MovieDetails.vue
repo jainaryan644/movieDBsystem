@@ -13,9 +13,11 @@
 <script>
     export default {
         props: ["movie"],
-        return {
-            avg_rating_rounded = Math.round(movie.avg_rating)
-        };
+        data() {
+            return {
+                avg_rating_rounded : Math.round(this.movie.avg_rating),
+            };
+        },
     };
 </script>
 

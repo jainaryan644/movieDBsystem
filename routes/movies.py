@@ -14,21 +14,22 @@ def dump_movies(top=False):
     conn = get_db_connection()
     cur = conn.cursor()
     if not top: cur.execute("SELECT mid, title, release_date, rating_sum, num_reviews FROM movie_")
-    else: cur.execute("SELECT mid, title, release_date, rating_sum, num_reviews FROM movie_ ORDER BY rating_sum/num_reviews*1.0 LIMIT 5") # the `*1.0` is a casting trick to compare on float
+    else: cur.execute("SELECT mid, title, release_date, NULLIF(rating_sum,0), NULLIF(num_reviews,0) FROM movie_ ORDER BY rating_sum/NULLIF(num_reviews,0)*1.0  LIMIT 5") # the `*1.0` is a casting trick to compare on float
     movies = cur.fetchall()
     cur.close()
     conn.close()
 
     # Convert each tuple to a dictionary with labels
-    movies_with_labels = [
-        {
+    movies_with_labels = []
+    for movie in movies:
+        if movie[4] is None: continue
+        movies_with_labels +=    {
             "mid": movie[0],
             "title": movie[1],
             "release_date": movie[2].strftime('%Y-%m-%d') if movie[2] else None,
             "avg_rating": movie[3] / movie[4]
         }
-        for movie in movies
-    ]
+    
 
     return jsonify(movies_with_labels)
 @movies_blueprint.route("/top", methods=["GET"])
@@ -39,7 +40,7 @@ def top_movies():
 def search_movies(movie_title):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT mid, title, release_date, rating_sum, num_reviews FROM movie_ WHERE title ILIKE %(name)s LIMIT 5", dict(name='%'+movie_title.strip()+'%'))
+    cur.execute("SELECT mid, title, release_date FROM movie_ WHERE title ILIKE %(name)s LIMIT 5", dict(name='%'+movie_title.strip()+'%'))
     movies = cur.fetchall()
     cur.close()
     conn.close()
@@ -50,10 +51,10 @@ def search_movies(movie_title):
             "mid": movie[0],
             "title": movie[1],
             "release_date": movie[2].strftime('%Y-%m-%d') if movie[2] else None,
-            "avg_rating": movie[3] / movie[4]
         }
         for movie in movies
     ]
+   
     return jsonify(results=movies_with_labels)
 
 
@@ -63,7 +64,7 @@ def get_movie_details(movie_id):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT m.mid, m.title, m.release_date, m.plot, m.rating_sum, m.num_reviews, ARRAY_AGG(g.genre_name) AS genres
+        SELECT m.mid, m.title, m.release_date, m.plot, m.rating_sum, NULLIF(m.num_reviews,0), ARRAY_AGG(g.genre_name) AS genres
         FROM movie_ m
         LEFT JOIN genre_of_ go ON m.mid = go.mid
         LEFT JOIN genre_ g ON go.genre_name = g.genre_name
@@ -77,6 +78,9 @@ def get_movie_details(movie_id):
         "mid": movie[0],
         "title": movie[1],
         "release_date": movie[2].strftime('%Y-%m-%d') if movie[2] else None,
-        "avg_rating": movie[3] / movie[4]
+        "avg_rating": 0
     }
+    if not movie[4] is None: 
+        outputMovie.avg_rating = movie[3]/movie[4]
     return jsonify(outputMovie)
+    

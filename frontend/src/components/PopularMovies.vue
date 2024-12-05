@@ -14,14 +14,19 @@ export default {
       topMovies: [], // Populate this with API data
     };
   },
-  methods:
+
+  methods: {
+    async fetchTopMovies(){
+      const response = await fetch("http://127.0.0.1:5000/movies/top");
+      const data = await response.json();
+
+      this.topMovies = data.results;
+    }
+  },
 
   mounted() {
     // Fetch top 5 movies here
-    const response = await fetch("http://127.0.0.1:5000/movies/top");
-    const data = await response.json();
-
-    this.topMovies = data.results;
+    this.fetchTopMovies();
   },
 };
 </script>

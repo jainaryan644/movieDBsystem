@@ -3,7 +3,7 @@
         <form v-if="isLoggedIn" @submit.prevent="submitReview">
             <textarea v-model="newReview.text" placeholder="Leave a review..."></textarea>
             <select v-model="newReview.rating">
-                <option v-for="star in 5" :value="star">{{ star }} Stars</option>
+                <option v-for="star in 5" :value="star" :key="star">{{ star }} Stars</option>
             </select>
             <button type="submit">Submit</button>
         </form>
@@ -34,7 +34,7 @@
             comment: "",
             rating: 0,
         },
-        reviews: [],
+        //reviews: [],
       };
     },
     methods: {
@@ -65,7 +65,7 @@
             }
         },
         submitReview() {
-            if this.newReview.rating < 1 {return;}
+            if (this.newReview.rating < 1) {return;}
             this.$emit("new-review", { ...this.newReview });
             this.newReview.text = "";
             this.newReview.rating = 0;
