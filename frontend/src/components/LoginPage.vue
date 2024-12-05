@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <h1>fiMDB</h1>
+    <NavBar />
     <form @submit.prevent="handleLogin">
       <div class="form-group">
         <label for="username">Username</label>
@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import NavBar from "./NavBar.vue";
 export default {
   data() {
     return {
@@ -24,6 +25,9 @@ export default {
       password: "",
       error: null,
     };
+  },
+  components: {
+    NavBar,
   },
   methods: {
     async handleLogin() {

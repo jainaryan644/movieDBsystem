@@ -36,6 +36,7 @@ export default {
       localStorage.removeItem("userId"); // Remove stored userId
       this.isLoggedIn = false; // Update login status
       this.username = ""; // Clear the username
+      this.$router.go(0);
     },
     async fetchUsername() {
       try {
