@@ -1,13 +1,13 @@
 import datetime
 from datetime import date
-import psycopg
-from psycopg import sql
+import psycopg2
+from psycopg2 import sql
 import hashlib
 import configparser
 import csv
 
 DB_CONFIG = {
-    "dbname": "mdb_412",
+    "database": "your_database_name",
     "user": "postgres",
     "password": "password",
     "host": "localhost",  # or your database host
@@ -16,9 +16,9 @@ DB_CONFIG = {
 
 def get_db_connection():
     try:
-        conn = psycopg.connect(**DB_CONFIG)
+        conn = psycopg2.connect(**DB_CONFIG)
         return conn
-    except psycopg.Error as e:
+    except psycopg2.Error as e:
         print(f"Error connecting to database: {e}")
         raise e
 
@@ -42,9 +42,17 @@ def initializeDatabaseTables():
                 mid INT NOT NULL,
                 comment TEXT NOT NULL, 
                 rating FLOAT NOT NULL, 
-                date DATE NOT NULL, 
-                vote INT NOT NULL
+                date DATE NOT NULL,
+                vote INT DEFAULT 0
     );""")
+    cur.execute("""CREATE TABLE user_votes (
+                uid INT NOT NULL, 
+                rid INT NOT NULL,
+                vote INT NOT NULL,
+                PRIMARY KEY (uid, rid),
+                FOREIGN KEY (uid) REFERENCES user_(uid) ON DELETE CASCADE,
+                FOREIGN KEY (rid) REFERENCES review_(rid) ON DELETE CASCADE
+            )""")
     cur.execute("""CREATE TABLE movie_ (
                 mid SERIAL PRIMARY KEY, 
                 title TEXT NOT NULL,
@@ -87,15 +95,16 @@ def initializeDatabaseTables():
 
 # Clear all tables, useful for when we need to make changes to table structure
 def dropAllTables():
-    cur.execute("DROP TABLE user_")
-    cur.execute("DROP TABLE review_")
-    cur.execute("DROP TABLE movie_")
-    cur.execute("DROP TABLE genre_")
-    cur.execute("DROP TABLE genre_of_")
-    cur.execute("DROP TABLE person_")
-    cur.execute("DROP TABLE cast_")
-    cur.execute("DROP TABLE crew_")
-    cur.execute("DROP TABLE director_")
+    cur.execute("DROP TABLE IF EXISTS user_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS review_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS movie_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS genre_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS genre_of_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS person_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS user_votes CASCADE")
+    cur.execute("DROP TABLE IF EXISTS cast_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS crew_ CASCADE")
+    cur.execute("DROP TABLE IF EXISTS director_ CASCADE")
 
 # Handles hashing as well as join_date within this function.
 def addUser(username, password, bio=""):
@@ -170,7 +179,7 @@ def leaveReview(uid, mid, rating, comment):
     insert_review_query = """INSERT INTO review_(uid, mid, rating, comment, date, vote)
                             VALUES(%s, %s, %s, %s, %s, 0)"""
     cur.execute(insert_review_query, (uid,mid,rating,comment,date.today()))
-    cur.execture("""UPDATE movie_ SET rating_sum = rating_sum + %s, num_reviews = num_reviews+1 WHERE mid = %s""",(rating,mid))
+    cur.execute("""UPDATE movie_ SET rating_sum = rating_sum + %s, num_reviews = num_reviews+1 WHERE mid = %s""",(rating,mid))
 
 def getUUID(value, valname1, valname2, table):
     query = sql.SQL("SELECT {valname1} FROM {table} WHERE {valname2} = {value}").format(table=sql.Identifier(table), valname1=sql.Identifier(valname1), valname2=sql.Identifier(valname2), value=value)

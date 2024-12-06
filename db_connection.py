@@ -1,8 +1,8 @@
-import psycopg
+import psycopg2
 
 def get_db_connection():
-    return psycopg.connect(
-        dbname="mdb_412",
+    return psycopg2.connect(
+        database="your_database_name",
         user="postgres",
         password="password",
         host="localhost",

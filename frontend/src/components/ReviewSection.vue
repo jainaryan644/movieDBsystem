@@ -1,74 +1,105 @@
 <template>
-    <div class="review-section">
-      <!-- Review Form -->
-      <form v-if="isLoggedIn && !hasLeftReview" @submit.prevent="submitReview">
-        <textarea
-          v-model="newReview.text"
-          placeholder="Leave a review..."
-          required
-        ></textarea>
-        <select v-model="newReview.rating" required>
-          <option disabled value="0">Select Rating</option>
-          <option v-for="star in 5" :value="star" :key="star">{{ star }} Stars</option>
-        </select>
-        <button type="submit">Submit</button>
-      </form>
-      <p v-else-if="!isLoggedIn">
-        Please <router-link to="/login">Log In</router-link> to leave a review.
-      </p>
-      <span v-else></span>
-      
-  
-      <!-- Reviews List -->
-      <ul v-if="reviews.length > 0" style="list-style-type: none; padding: 0;">
-        <li v-for="review in reviews" :key="review.rid">
-          <div>
-            <b><router-link :to="'/profile/'+review.uid" class="user-link">{{ review.username }}</router-link></b>
-            <span class="simpleBox">
-              <span v-for="n in 5" :key="n" :class="{ yellowStar: n <= review.rating }">
-                ★
-              </span>
+  <div class="review-section">
+    <h2>Reviews</h2>
+
+    <!-- Review Form -->
+    <form v-if="isLoggedIn && !hasLeftReview" @submit.prevent="submitReview">
+      <textarea
+        v-model="newReview.comment"
+        placeholder="Leave a review..."
+        required
+      ></textarea>
+      <select v-model="newReview.rating" required>
+        <option disabled value="0">Select Rating</option>
+        <option v-for="star in 5" :value="star" :key="star">{{ star }} Stars</option>
+      </select>
+      <button type="submit">Submit</button>
+    </form>
+    <p v-else-if="!isLoggedIn">
+      Please <router-link to="/login">Log In</router-link> to leave a review.
+    </p>
+    <p v-else>
+      You have already left a review for this movie.
+    </p>
+
+    <!-- Reviews List -->
+    <ul style="list-style-type: none; padding: 0;">
+      <li v-for="review in reviews" :key="review.rid">
+        <div>
+          <b>
+            <router-link :to="'/profile/' + review.uid" class="user-link">
+              {{ review.username }}
+            </router-link>
+          </b>
+          <span class="simpleBox">
+            <span
+              v-for="n in 5"
+              :key="n"
+              :class="{ yellowStar: n <= review.rating }"
+            >
+              ★
             </span>
-          </div>
-          <blockquote>{{ review.comment }}</blockquote>
-          <p class="review-date">{{ review.date }}</p>
-          <hr>
-        </li>
-      </ul>
-      <p v-else>No reviews yet. Be the first to review!</p>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    props: {
-      movieId: {
-        type: Number,
-        required: true, // Ensure `movieId` is passed correctly
+          </span>
+        </div>
+        <blockquote>{{ review.comment }}</blockquote>
+        <div>
+          <button
+            :disabled="!isLoggedIn || review.userVoted === 'upvote'"
+            @click="vote(review.rid, 'upvote')"
+            class="vote-button"
+          >
+            👍 
+          </button>
+          <span class="net-votes">{{ review.netVotes }}</span>
+          <button
+            :disabled="!isLoggedIn || review.userVoted === 'downvote'"
+            @click="vote(review.rid, 'downvote')"
+            class="vote-button"
+          >
+            👎 
+          </button>
+        </div>
+        <p class="review-date">{{ review.date }}</p>
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    movieId: {
+      type: Number,
+      required: true, // Ensure `movieId` is passed correctly
+    },
+  },
+  data() {
+    return {
+      isLoggedIn: !!localStorage.getItem("userId"),
+      hasLeftReview: false, // Check if the user has already left a review
+      username: "",
+      newReview: {
+        comment: "",
+        rating: 0,
       },
-    },
-    data() {
-      return {
-        isLoggedIn: !!localStorage.getItem("userId"),
-        hasLeftReview: true,
-        newReview: {
-          text: "",
-          rating: 0,
-        },
-        reviews: [], // List of reviews
-      };
-    },
-    mounted() {
-      this.fetchReviews(); // Fetch reviews on component mount
-      this.checkIfUserLeftReview();
-    },
-    methods: {
-      async fetchReviews() {
-        try {
-          const response = await fetch(`http://127.0.0.1:5000/reviews/movie/${this.movieId}`);
+      reviews: [],
+    };
+  },
+  mounted() {
+    this.fetchReviews(); // Fetch reviews when component is mounted
+    this.fetchUsername(); // Fetch username if logged in
+    this.checkIfUserLeftReview(); // Check if the user has already reviewed this movie
+  },
+  methods: {
+    async fetchUsername() {
+      try {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
           if (response.ok) {
-            const reviewsData = await response.json();
-            this.reviews = reviewsData; // Assign fetched reviews to the data property
+            const data = await response.json();
+            this.username = data.username;
+            this.isLoggedIn = true;
           } else {
             console.error("Failed to fetch reviews.");
           }
@@ -133,11 +164,11 @@
     font-size: 0.9rem;
     color: gray;
   }
-
+  
   .user-link {
     color: black;
   }
-  
+
   .simpleBox {
     display: inline-block;
     margin-left: 0.5rem;
