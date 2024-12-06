@@ -23,7 +23,7 @@
       <ul v-if="reviews.length > 0" style="list-style-type: none; padding: 0;">
         <li v-for="review in reviews" :key="review.rid">
           <div>
-            <b><router-link :to="'/profile/'+review.uid">{{ review.username }}</router-link></b>
+            <b><router-link :to="'/profile/'+review.uid" class="user-link">{{ review.username }}</router-link></b>
             <span class="simpleBox">
               <span v-for="n in 5" :key="n" :class="{ yellowStar: n <= review.rating }">
                 ★
@@ -132,6 +132,10 @@
   .review-date {
     font-size: 0.9rem;
     color: gray;
+  }
+
+  .user-link {
+    color: black;
   }
   
   .simpleBox {
