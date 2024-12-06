@@ -78,7 +78,7 @@ export default {
   position: absolute;
   top: 100%;
   left: 0;
-  width: 100%;
+  width: 102.5%; /* Tweaked value to align with search bar, dunno why it's finnicky */
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 5px;
