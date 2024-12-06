@@ -25,3 +25,13 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+ul {
+  background-color: white;
+  margin-top: 0%;
+  list-style-type: none; 
+  padding: 0;
+  
+}
+</style>
