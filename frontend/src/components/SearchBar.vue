@@ -92,35 +92,6 @@ export default {
 a {
   color: black;
 }
-.search-bar {
-  position: relative;
-  width: 600px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  font-size: 1rem;
-}
-
-.search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
 
 .search-result-item {
   display: block;
