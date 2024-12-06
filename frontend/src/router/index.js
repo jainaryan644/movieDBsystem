@@ -4,7 +4,7 @@ import LoginPage from "../components/LoginPage.vue";
 import MoviePage from "../components/MoviePage.vue";
 import UserProfile from "../components/UserProfile.vue"; 
 import CreateProfile from "@/components/CreateProfile.vue";
-
+import UserSettings from "../components/UserSettings.vue";
 
 const routes = [
   {
@@ -23,7 +23,7 @@ const routes = [
     component: MoviePage,
   },
   {
-    path: "/profile",
+    path: "/profile/:uid",
     name: "UserProfile",
     component: UserProfile,
   },
@@ -32,6 +32,11 @@ const routes = [
     name: "CreateProfile",
     component: CreateProfile,
   },
+  {
+    path: "/settings",
+    name: "UserSettings",
+    component: UserSettings,
+  }
 ];
 
 const router = createRouter({

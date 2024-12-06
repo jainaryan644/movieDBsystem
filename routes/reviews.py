@@ -85,7 +85,6 @@ def get_reviews_for_user(user_id):
         ORDER BY r.date DESC
     """, (user_id,))
     reviews = cur.fetchall()
-    print(reviews)
     cur.close()
     conn.close()
 
@@ -100,7 +99,6 @@ def get_reviews_for_user(user_id):
         }
         for review in reviews
     ]
-    print(reviews_with_labels)
     return jsonify(reviews_with_labels), 201
 
 
@@ -109,7 +107,7 @@ def get_reviews_for_movie(movie_id):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT r.rid, r.comment, r.rating, r.date, u.username
+        SELECT r.rid, r.comment, r.rating, r.date, u.username, r.uid
         FROM review_ r
         JOIN user_ u ON r.uid = u.uid
         WHERE r.mid = %s
@@ -126,6 +124,7 @@ def get_reviews_for_movie(movie_id):
             "rating": review[2],
             "date": review[3].strftime('%Y-%m-%d') if review[3] else None,
             "username": review[4],
+            "uid": review[5],
         }
         for review in reviews
     ]

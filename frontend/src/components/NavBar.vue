@@ -9,7 +9,7 @@
         <!-- Display Welcome Message, Username (as a Link), and Logout Button -->
         <span>
           Welcome, 
-          <router-link to="/profile" class="username-link">{{ username }}</router-link> 
+          <router-link :to="'/profile/' + uid" class="username-link">{{ username }}</router-link> 
           | 
         </span>
         <button @click="handleLogout">Logout</button>
@@ -28,6 +28,7 @@ export default {
     return {
       isLoggedIn: !!localStorage.getItem("userId"), // Check login status from localStorage
       username: "", // Store the username
+      uid: -1,
     };
   },
   methods: {
@@ -40,6 +41,7 @@ export default {
       localStorage.removeItem("userId"); // Remove stored userId
       this.isLoggedIn = false; // Update login status
       this.username = ""; // Clear the username
+      this.uid = -1;
       this.$router.go(0);
     },
     async fetchUsername() {
@@ -51,15 +53,18 @@ export default {
           if (response.ok) {
             const data = await response.json();
             this.username = data.username;
+            this.uid = data.uid;
             this.isLoggedIn = true;
           } else {
             // If the response isn't OK, clear login status
             this.isLoggedIn = false;
+            this.uid = -1;
             this.username = "";
           }
         } else {
           // If there's no userId in localStorage
           this.isLoggedIn = false;
+          this.uid = -1;
           this.username = "";
         }
       } catch (error) {

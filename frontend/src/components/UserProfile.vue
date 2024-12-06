@@ -1,8 +1,12 @@
 <template>
     <div class="user-profile-page">
       <NavBar />
-      <div class="profile-container">
-        <h1>{{ username }}</h1>
+      <p v-if="$route.params.uid < 1">Not logged in</p>
+      <div v-else class="profile-container">
+        <div id="profile-title">
+          <h1>{{ username }}</h1>
+          <button v-if="isUser" @click="routeToSettings">Profile Settings</button>
+        </div>
         <h2>Bio</h2>
         <p>{{ userBio }}</p>
         <h2>Reviews</h2>
@@ -46,11 +50,15 @@
         username: "",
         userBio: "",
         reviews: [],
+        isUser: false,
       };
     },
     methods: {
+      routeToSettings(){
+        this.$router.push("/settings");
+      },
       async getUserDetails(){
-        const userId = localStorage.getItem("userId");
+        const userId = this.$route.params.uid;
   
         // Fetch username and bio
         try {
@@ -67,7 +75,7 @@
         }
       },
       async getUserReviews(){
-        const userId = localStorage.getItem("userId");
+        const userId = this.$route.params.uid;
 
         // Fetch user reviews
         try {
@@ -76,7 +84,6 @@
           );
           if (reviewsResponse.ok) {
             const reviewsData = await reviewsResponse.json();
-            console.log(reviewsData);
             this.reviews = reviewsData;
           } else {
             console.error("Failed to fetch user reviews");
@@ -89,13 +96,29 @@
     async mounted() {
       this.getUserDetails();
       this.getUserReviews();
-  
+      const userId = localStorage.getItem("userId");
+      console.log(userId);
+      console.log(this.$route.params.uid);
+      if(userId == this.$route.params.uid){
+        this.isUser = true;
+      }
       
     },
   };
   </script>
   
   <style scoped>
+  #profile-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  h1 {
+    margin: 0;
+  }
+  button {
+    margin-left: auto;
+  }
   .review-date {
     font-size: 0.9rem;
     color: gray;
@@ -125,6 +148,14 @@
   
   .yellowStar {
     color: gold;
+  }
+  button {
+    background-color: #4caf50;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
   }
   </style>
   
