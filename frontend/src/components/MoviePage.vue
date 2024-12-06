@@ -10,7 +10,6 @@
     <div v-else>
       <p>Loading movie details...</p>
     </div>
-    <h1>Reviews</h1>
     <ReviewSection v-if="movie" :movieId="movie.mid"/>
   </template>
   
