@@ -108,6 +108,20 @@
           console.error("Error fetching reviews:", error);
         }
       },
+      async fetchReviews() {
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:5000/reviews/movie/${this.movieId}`
+          );
+          if (response.ok) {
+            this.reviews = await response.json();
+          } else {
+            console.error("Failed to fetch reviews.");
+          }
+        } catch (error) {
+          console.error("Error fetching reviews:", error);
+        }
+      },
       async checkIfUserLeftReview(){
         const userId = localStorage.getItem("userId");
         try {
