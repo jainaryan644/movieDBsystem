@@ -65,7 +65,7 @@
             }
         },
         submitReview() {
-            if this.newReview.rating < 1 {return;}
+            if (this.newReview.rating < 1) {return;}
             this.$emit("new-review", { ...this.newReview });
             this.newReview.text = "";
             this.newReview.rating = 0;

@@ -22,17 +22,18 @@
         components: {
             MovieDetails,
             ReviewSection,
+            NavBar,
         },
         methods: {
             async getMovieAndReviews() {
-                const movieResponse = await fetch(`http://127.0.0.1:5000/movies/${$route.params.mid}`);
+                const movieResponse = await fetch(`http://127.0.0.1:5000/movies/${this.$router.params.mid}`);
                 const movieData = await movieResponse.json();
-                if json.stringify(movieData) === "{}"{$router.push("/");}
+                if (this.json.stringify(movieData) === "{}"){$router.push("/");}
                 this.movie = movieData;
-                const reviewsResponse = await fetch(`http://127.0.0.1:5000/reviews/movie/${$route.params.mid}`);
+                const reviewsResponse = await fetch(`http://127.0.0.1:5000/reviews/movie/${this.$router.params.mid}`);
                 const reviewsData = await reviewsResponse.json();
                 this.reviews = reviewsData.results;
-            }
+            },
             async addReview(newReview) {
                 const pushReviewResponse = await fetch(`http://127.0.0.1:5000/reviews/add`, {
                     method: "POST",
