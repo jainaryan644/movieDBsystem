@@ -15,11 +15,11 @@ export default {
       topMovies: [],
     };
   },
-
   methods: {
     async fetchTopMovies(){
       const response = await fetch("http://127.0.0.1:5000/movies/top");
       const data = await response.json();
+      
       this.topMovies = data;
     }
   },

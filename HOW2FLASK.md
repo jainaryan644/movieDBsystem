@@ -1,7 +1,7 @@
 okay so start with 
 
 pip install flask flask-cors
-pip install psycopg-binary configparser
+pip install "psycopg[binary]"
 python
 import flask
 

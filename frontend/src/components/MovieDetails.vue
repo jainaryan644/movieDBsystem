@@ -1,6 +1,6 @@
 <template>
-    <div v-if="movie" class="movie-details">
-        <h1>{{ movie.title }}</h1>
+    <div v-if="movie" class="movie-details" >
+        <h1 :key="$route.params.mid">{{ movie.title }}</h1>
         <img :src="movie.poster" alt="Movie Poster" v-if="movie.poster" />
         <span class="simpleBox">
             <span v-for="n in 5" :key="n" :class="{'yellowStar':n <= avg_rating_rounded}">★</span>
