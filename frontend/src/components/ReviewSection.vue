@@ -13,10 +13,11 @@
         </select>
         <button type="submit">Submit</button>
       </form>
-      <span v-else-if="hasLeftReview"></span>
-      <p v-else>
+      <p v-else-if="!isLoggedIn">
         Please <router-link to="/login">Log In</router-link> to leave a review.
       </p>
+      <span v-else></span>
+      
   
       <!-- Reviews List -->
       <ul v-if="reviews.length > 0" style="list-style-type: none; padding: 0;">
