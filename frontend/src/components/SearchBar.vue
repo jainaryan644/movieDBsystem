@@ -32,6 +32,7 @@ ul {
   margin-top: 0%;
   list-style-type: none; 
   padding: 0;
-  
+  width: 100px;
+  justify-content: center;
 }
 </style>
