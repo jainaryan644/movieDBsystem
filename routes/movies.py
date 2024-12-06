@@ -17,11 +17,12 @@ def dump_movies(top=False):
         cur.execute("SELECT mid, title, release_date, rating_sum, num_reviews FROM movie_")
     else:
         cur.execute("""
-            SELECT mid, title, release_date, rating_sum, NULLIF(num_reviews, 0)
+            SELECT mid, title, release_date, rating_sum, num_reviews
             FROM movie_
-            ORDER BY rating_sum / NULLIF(num_reviews, 0) * 1.0 DESC
+            WHERE NOT(num_reviews = 0)
+            ORDER BY rating_sum / num_reviews* 1.0 DESC
             LIMIT 5
-        """)  # Using NULLIF to avoid division by zero
+        """)
 
     movies = cur.fetchall()
     cur.close()
@@ -30,12 +31,11 @@ def dump_movies(top=False):
     # Convert each tuple to a dictionary with labels
     movies_with_labels = []
     for movie in movies:
-        avg_rating = movie[3] / movie[4] if movie[4] else 0
         movies_with_labels.append({
             "mid": movie[0],
             "title": movie[1],
             "release_date": movie[2].strftime('%Y-%m-%d') if movie[2] else None,
-            "avg_rating": avg_rating,
+            "avg_rating": movie[3] / movie[4],
         })
 
     return jsonify(movies_with_labels)

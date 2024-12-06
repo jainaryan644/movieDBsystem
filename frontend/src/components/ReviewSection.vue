@@ -1,7 +1,7 @@
 <template>
     <div class="review-section">
       <!-- Review Form -->
-      <form v-if="isLoggedIn" @submit.prevent="submitReview">
+      <form v-if="isLoggedIn && !hasLeftReview" @submit.prevent="submitReview">
         <textarea
           v-model="newReview.text"
           placeholder="Leave a review..."
@@ -13,15 +13,17 @@
         </select>
         <button type="submit">Submit</button>
       </form>
-      <p v-else>
+      <p v-else-if="!isLoggedIn">
         Please <router-link to="/login">Log In</router-link> to leave a review.
       </p>
+      <span v-else></span>
+      
   
       <!-- Reviews List -->
       <ul v-if="reviews.length > 0" style="list-style-type: none; padding: 0;">
         <li v-for="review in reviews" :key="review.rid">
           <div>
-            <b>{{ review.username }}</b>
+            <b><router-link :to="'/profile/'+review.uid">{{ review.username }}</router-link></b>
             <span class="simpleBox">
               <span v-for="n in 5" :key="n" :class="{ yellowStar: n <= review.rating }">
                 ★
@@ -30,6 +32,7 @@
           </div>
           <blockquote>{{ review.comment }}</blockquote>
           <p class="review-date">{{ review.date }}</p>
+          <hr>
         </li>
       </ul>
       <p v-else>No reviews yet. Be the first to review!</p>
@@ -47,6 +50,7 @@
     data() {
       return {
         isLoggedIn: !!localStorage.getItem("userId"),
+        hasLeftReview: true,
         newReview: {
           text: "",
           rating: 0,
@@ -56,6 +60,7 @@
     },
     mounted() {
       this.fetchReviews(); // Fetch reviews on component mount
+      this.checkIfUserLeftReview();
     },
     methods: {
       async fetchReviews() {
@@ -69,6 +74,19 @@
           }
         } catch (error) {
           console.error("Error fetching reviews:", error);
+        }
+      },
+      async checkIfUserLeftReview(){
+        const userId = localStorage.getItem("userId");
+        try {
+          const response = await fetch(`http://127.0.0.1:5000/reviews/validate_review/${userId}/${this.movieId}`);
+          const data = await response.json();
+          if(data.result == true){
+            this.hasLeftReview = true;
+          } else {this.hasLeftReview = false;}
+          
+        } catch (error) {
+          console.error("Error checking review status:", error);
         }
       },
       async submitReview() {
@@ -97,6 +115,7 @@
             this.reviews.push(newReview); // Dynamically add the new review to the list
             this.newReview.text = ""; // Clear the text box
             this.newReview.rating = 0; // Reset the rating
+            this.hasLeftReview = true;
             this.fetchReviews(); // Refresh reviews to ensure consistency
           } else {
             console.error("Failed to submit review.");
