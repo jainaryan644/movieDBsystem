@@ -12,8 +12,15 @@ def users_home():
 # Register a new user
 @users_blueprint.route("/register", methods=["POST"])
 def register_user():
+    
 
     data = request.get_json()
+    cur.execute("SELECT 1 FROM user_ WHERE username = %s", (data["username"],)) # Check if username already in use
+    existing_user = cur.fetchone()
+    if(existing_user):
+        cur.close()
+        conn.close()
+        return jsonify({"message": "Username already in use!"}), 409
     password_hash = hashlib.sha256(data["password"].encode()).hexdigest()
 
     conn = get_db_connection()
@@ -27,6 +34,9 @@ def register_user():
     conn.close()
 
     return jsonify({"message": "User registered successfully!"}), 201
+
+# Update User Info
+@users_blueprint.route("/update", methods=[])
 
 # Authenticate a user
 @users_blueprint.route("/login", methods=["POST", "GET"])
