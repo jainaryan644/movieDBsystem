@@ -12,7 +12,10 @@
             <p>{{ movie.plot }}</p>
         </div>
         <hr>
-        <p>Released: {{ formattedDate(movie.release_date) }}</p>
+        <div>
+            <h3>Released:</h3>
+            <p>{{ formattedDate(movie.release_date)  }}</p>
+        </div>
     </div>
 </template>
   

@@ -129,3 +129,70 @@ def get_reviews_for_movie(movie_id):
         for review in reviews
     ]
     return jsonify(reviews_with_labels)
+
+
+@reviews_blueprint.route("/vote", methods=["POST", "OPTIONS"])
+def vote_on_review():
+    if request.method == "OPTIONS":
+        # Allow preflight requests
+        return jsonify({"message": "Preflight request successful"}), 200
+
+    data = request.get_json()
+
+    # Check for required fields
+    if "user_id" not in data or "review_id" not in data or "vote_type" not in data:
+        return jsonify({"message": "Missing required fields."}), 400
+
+    user_id = data["user_id"]
+    review_id = data["review_id"]
+    vote_type = data["vote_type"]
+
+    # Normalize vote_type to numeric value
+    if vote_type == "upvote" or vote_type == 1:
+        vote_increment = 1
+    elif vote_type == "downvote" or vote_type == -1:
+        vote_increment = -1
+    else:
+        return jsonify({"message": "Invalid vote type. Must be 'upvote', 'downvote', 1, or -1."}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Ensure the user exists
+    cur.execute("SELECT 1 FROM user_ WHERE uid = %s", (user_id,))
+    if not cur.fetchone():
+        cur.close()
+        conn.close()
+        return jsonify({"message": "User not found."}), 404
+
+    # Check if the user has already voted on this review
+    cur.execute("SELECT vote FROM user_votes WHERE uid = %s AND rid = %s", (user_id, review_id))
+    existing_vote = cur.fetchone()
+
+    if existing_vote:
+        previous_vote = existing_vote[0]
+        if previous_vote == vote_increment:
+            # If the same vote is submitted, do nothing
+            cur.close()
+            conn.close()
+            return jsonify({"message": "Vote already submitted."}), 200
+
+        # Update the user's vote and adjust the net vote count
+        cur.execute("UPDATE user_votes SET vote = %s WHERE uid = %s AND rid = %s", (vote_increment, user_id, review_id))
+        vote_diff = vote_increment - previous_vote
+        cur.execute("UPDATE review_ SET vote = vote + %s WHERE rid = %s", (vote_diff, review_id))
+    else:
+        # Insert a new vote
+        cur.execute("INSERT INTO user_votes (uid, rid, vote) VALUES (%s, %s, %s)", (user_id, review_id, vote_increment))
+        cur.execute("UPDATE review_ SET vote = vote + %s WHERE rid = %s", (vote_increment, review_id))
+
+    # Fetch updated net votes for the review
+    cur.execute("SELECT vote FROM review_ WHERE rid = %s", (review_id,))
+    net_votes = cur.fetchone()[0]
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return jsonify({"net_votes": net_votes}), 200
+
