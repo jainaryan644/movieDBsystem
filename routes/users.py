@@ -12,7 +12,8 @@ def users_home():
 # Register a new user
 @users_blueprint.route("/register", methods=["POST"])
 def register_user():
-    
+    conn = get_db_connection()
+    cur = conn.cursor()
 
     data = request.get_json()
     cur.execute("SELECT 1 FROM user_ WHERE username = %s", (data["username"],)) # Check if username already in use
@@ -23,8 +24,7 @@ def register_user():
         return jsonify({"message": "Username already in use!"}), 409
     password_hash = hashlib.sha256(data["password"].encode()).hexdigest()
 
-    conn = get_db_connection()
-    cur = conn.cursor()
+    
     cur.execute("""
         INSERT INTO user_ (username, hash, join_date, bio)
         VALUES (%s, %s, CURRENT_DATE, %s)
@@ -55,8 +55,6 @@ def update_user_info():
             cPassword_hash = hashlib.sha256(pt_cPassword.encode()).hexdigest()
             cur.execute("SELECT hash FROM user_ WHERE uid = %s", (data["uid"],))
             currentHash = cur.fetchone()[0]
-            print(cPassword_hash)
-            print(pt_cPassword)
             print(currentHash)
             if(cPassword_hash != currentHash): return jsonify({"message": "Invalid credentials"}), 401
             cur.execute("UPDATE user_ SET hash = %s WHERE uid = %s", (nPassword_hash, data["uid"]))
