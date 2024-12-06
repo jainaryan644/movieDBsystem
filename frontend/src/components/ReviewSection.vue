@@ -66,42 +66,43 @@
 </template>
 
 <script>
-export default {
-  props: {
-    movieId: {
-      type: Number,
-      required: true, // Ensure `movieId` is passed correctly
-    },
-  },
-  data() {
-    return {
-      isLoggedIn: !!localStorage.getItem("userId"),
-      hasLeftReview: false, // Check if the user has already left a review
-      username: "",
-      newReview: {
-        comment: "",
-        rating: 0,
+  export default {
+    props: {
+      movieId: {
+        type: Number,
+        required: true, // Ensure `movieId` is passed correctly
       },
-      reviews: [],
-    };
-  },
-  mounted() {
-    this.fetchReviews(); // Fetch reviews when component is mounted
-    this.fetchUsername(); // Fetch username if logged in
-    this.checkIfUserLeftReview(); // Check if the user has already reviewed this movie
-  },
-  methods: {
-    async fetchUsername() {
-      try {
-        const userId = localStorage.getItem("userId");
-        if (userId) {
-          const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
-          if (response.ok) {
-            const data = await response.json();
-            this.username = data.username;
-            this.isLoggedIn = true;
-          } else {
-            console.error("Failed to fetch reviews.");
+    },
+    data() {
+      return {
+        isLoggedIn: !!localStorage.getItem("userId"),
+        hasLeftReview: false, // Check if the user has already left a review
+        username: "",
+        newReview: {
+          comment: "",
+          rating: 0,
+        },
+        reviews: [],
+      };
+    },
+    mounted() {
+      this.fetchReviews(); // Fetch reviews when component is mounted
+      this.fetchUsername(); // Fetch username if logged in
+      this.checkIfUserLeftReview(); // Check if the user has already reviewed this movie
+    },
+    methods: {
+      async fetchUsername() {
+        try {
+          const userId = localStorage.getItem("userId");
+          if (userId) {
+            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
+            if (response.ok) {
+              const data = await response.json();
+              this.username = data.username;
+              this.isLoggedIn = true;
+            } else {
+              console.error("Failed to fetch reviews.");
+            }
           }
         } catch (error) {
           console.error("Error fetching reviews:", error);
@@ -127,7 +128,7 @@ export default {
             alert("You must be logged in to submit a review.");
             return;
           }
-  
+
           const response = await fetch(`http://127.0.0.1:5000/reviews/add`, {
             method: "POST",
             headers: {
@@ -140,7 +141,7 @@ export default {
               rating: this.newReview.rating,
             }),
           });
-  
+
           if (response.ok) {
             const newReview = await response.json();
             this.reviews.push(newReview); // Dynamically add the new review to the list
@@ -157,7 +158,7 @@ export default {
       },
     },
   };
-  </script>
+</script>
   
   <style scoped>
   .review-date {
