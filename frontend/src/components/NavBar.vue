@@ -4,7 +4,7 @@
       <!-- Home Button/Icon -->
       <router-link to="/" class="home-icon">fIMDB</router-link>
     </div>
-    <div><SearchBar class="nav-center" style="margin: auto;"/></div>
+    <div><SearchBar class="nav-center" style="margin: auto;" @new-page="$emit('new-page')"/></div>
     <div class="nav-right">
       <div v-if="isLoggedIn">
         <!-- Display Welcome Message, Username (as a Link), and Logout Button -->

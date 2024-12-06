@@ -1,6 +1,7 @@
 <template>
-    <NavBar />
-    <MovieDetails v-if="movie" :movie="movie"/>
+    <NavBar @new-page="newPageSelected"/>
+    <div :key="reload_var">
+    <MovieDetails  v-if="movie" :movie="movie"/>
     <!-- <div v-if="movie"> 
       <h1>{{ movie.title }}</h1>
       <p>Released: {{ movie.release_date }}</p>
@@ -12,6 +13,7 @@
     </div>
     <h1>Reviews</h1>
     <ReviewSection v-if="movie" :movieId="movie.mid"/>
+    </div>
   </template>
   
   <script>
@@ -21,6 +23,11 @@
   import axios from "axios";
   
   export default {
+    watch: {
+        'this.$route.params.id': function () {
+            this.$route.push(0);
+        },
+    },
     components: {
       ReviewSection,
       MovieDetails,
@@ -29,11 +36,12 @@
     data() {
       return {
         movie: null, // Movie details
+        reload_var: 0,
       };
     },
-    async mounted() {
+    mounted() {
       //const movieId = this.$route.params.mid; // Get movie ID from route
-      await this.fetchMovieDetails(this.$route.params.mid);
+      this.fetchMovieDetails(this.$route.params.mid);
       // if (movieId) {
       //   this.fetchMovieDetails(movieId);
       // }
@@ -46,6 +54,10 @@
         } catch (error) {
           console.error("Error fetching movie details:", error);
         }
+      },
+      newPageSelected(){
+        this.fetchMovieDetails(this.$route.params.mid);
+        
       },
     },
   };
