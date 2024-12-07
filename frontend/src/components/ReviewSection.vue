@@ -170,6 +170,40 @@
           console.error("Error submitting review:", error);
         }
       },
+      async vote(reviewId, voteType) {
+        const userId = localStorage.getItem("userId");
+        if (!userId) {
+          alert("You must be logged in to vote!");
+          return;
+        }
+
+        try {
+          const response = await fetch(`http://127.0.0.1:5000/reviews/vote`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: parseInt(userId),
+              review_id: reviewId,
+              vote_type: voteType,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const index = this.reviews.findIndex((r) => r.rid === reviewId);
+            if (index !== -1) {
+              this.reviews[index].netVotes = data.net_votes; // Update net votes dynamically
+              this.reviews[index].userVoted = voteType; // Mark which vote was cast
+            }
+          } else {
+            console.error("Failed to submit vote.");
+          }
+        } catch (error) {
+          console.error("Error submitting vote:", error);
+        }
+      },
     },
   };
 </script>
