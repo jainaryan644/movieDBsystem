@@ -89,7 +89,7 @@ export default {
   justify-content: space-between;
   align-items: center; */
   display: grid;
-  grid-template-columns: .6fr 20fr 1.5fr;
+  grid-template-columns: .6fr 20fr 3fr;
   padding: 0.5rem 1rem;
   background-color: #4caf50; 
   color: white;
@@ -105,8 +105,8 @@ export default {
 .nav-center {
   text-align: center;
 }
-.nav-right username-style {
-  padding-right: 100rem;
+.nav-right {
+  text-align: right;
 }
 .nav-right button {
   background-color: white;

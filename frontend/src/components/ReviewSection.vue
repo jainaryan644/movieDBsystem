@@ -27,7 +27,7 @@
       <li v-for="review in reviews" :key="review.rid">
         <div>
           <b>
-            <router-link :to="'/profile/' + review.uid" class="username">
+            <router-link :to="'/profile/' + review.uid" class="user-link">
               {{ review.username }}
             </router-link>
           </b>
@@ -66,229 +66,159 @@
 </template>
 
 <script>
-export default {
-  props: {
-    movieId: {
-      type: Number,
-      required: true, // Ensure `movieId` is passed correctly
-    },
-  },
-  data() {
-    return {
-      isLoggedIn: !!localStorage.getItem("userId"),
-      hasLeftReview: false, // Check if the user has already left a review
-      username: "",
-      newReview: {
-        comment: "",
-        rating: 0,
+  export default {
+    props: {
+      movieId: {
+        type: Number,
+        required: true, // Ensure `movieId` is passed correctly
       },
-      reviews: [],
-    };
-  },
-  mounted() {
-    this.fetchReviews(); // Fetch reviews when component is mounted
-    this.fetchUsername(); // Fetch username if logged in
-    this.checkIfUserLeftReview(); // Check if the user has already reviewed this movie
-  },
-  methods: {
-    async fetchUsername() {
-      try {
-        const userId = localStorage.getItem("userId");
-        if (userId) {
-          const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
+    },
+    data() {
+      return {
+        isLoggedIn: !!localStorage.getItem("userId"),
+        hasLeftReview: false, // Check if the user has already left a review
+        username: "",
+        newReview: {
+          comment: "",
+          rating: 0,
+        },
+        reviews: [],
+      };
+    },
+    mounted() {
+      this.fetchReviews(); // Fetch reviews when component is mounted
+      this.fetchUsername(); // Fetch username if logged in
+      this.checkIfUserLeftReview(); // Check if the user has already reviewed this movie
+    },
+    methods: {
+      async fetchUsername() {
+        try {
+          const userId = localStorage.getItem("userId");
+          if (userId) {
+            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`);
+            if (response.ok) {
+              const data = await response.json();
+              this.username = data.username;
+              this.isLoggedIn = true;
+            } else {
+              console.error("Failed to fetch reviews.");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching reviews:", error);
+        }
+      },
+      async fetchReviews() {
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:5000/reviews/movie/${this.movieId}`
+          );
           if (response.ok) {
-            const data = await response.json();
-            this.username = data.username;
-            this.isLoggedIn = true;
+            this.reviews = await response.json();
           } else {
-            this.isLoggedIn = false;
-            this.username = "";
+            console.error("Failed to fetch reviews.");
           }
+        } catch (error) {
+          console.error("Error fetching reviews:", error);
         }
-      } catch (error) {
-        console.error("Failed to fetch username:", error);
-      }
-    },
-    async fetchReviews() {
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:5000/reviews/movie/${this.movieId}`
-        );
-        if (response.ok) {
-          this.reviews = await response.json();
-        } else {
-          console.error("Failed to fetch reviews.");
-        }
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-      }
-    },
-    async checkIfUserLeftReview() {
-      const userId = localStorage.getItem("userId");
-      try {
-        const response = await fetch(
-          `http://127.0.0.1:5000/reviews/validate_review/${userId}/${this.movieId}`
-        );
-        const data = await response.json();
-        this.hasLeftReview = data.result;
-      } catch (error) {
-        console.error("Error checking if user left a review:", error);
-      }
-    },
-    async submitReview() {
-      try {
+      },
+      async checkIfUserLeftReview(){
         const userId = localStorage.getItem("userId");
-        if (!userId) {
-          alert("You must be logged in to submit a review.");
-          return;
-        }
-
-        const response = await fetch(`http://127.0.0.1:5000/reviews/add`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            uid: parseInt(userId),
-            mid: this.movieId,
-            comment: this.newReview.comment,
-            rating: this.newReview.rating,
-          }),
-        });
-
-        if (response.ok) {
-          this.fetchReviews(); // Refresh reviews to reflect the new review
-          this.hasLeftReview = true; // Hide the review form
-        } else {
-          console.error("Failed to submit review.");
-        }
-      } catch (error) {
-        console.error("Error submitting review:", error);
-      }
-    },
-    async vote(reviewId, voteType) {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("You must be logged in to vote!");
-        return;
-      }
-
-      try {
-        const response = await fetch(`http://127.0.0.1:5000/reviews/vote`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: parseInt(userId),
-            review_id: reviewId,
-            vote_type: voteType,
-          }),
-        });
-
-        if (response.ok) {
+        try {
+          const response = await fetch(`http://127.0.0.1:5000/reviews/validate_review/${userId}/${this.movieId}`);
           const data = await response.json();
-          const index = this.reviews.findIndex((r) => r.rid === reviewId);
-          if (index !== -1) {
-            this.reviews[index].netVotes = data.net_votes; // Update net votes dynamically
-            this.reviews[index].userVoted = voteType; // Mark which vote was cast
-          }
-        } else {
-          console.error("Failed to submit vote.");
+          if(data.result == true){
+            this.hasLeftReview = true;
+          } else {this.hasLeftReview = false;}
+          
+        } catch (error) {
+          console.error("Error checking review status:", error);
         }
-      } catch (error) {
-        console.error("Error submitting vote:", error);
-      }
+      },
+      async submitReview() {
+        try {
+          const userId = localStorage.getItem("userId");
+          if (!userId) {
+            alert("You must be logged in to submit a review.");
+            return;
+          }
+
+          const response = await fetch(`http://127.0.0.1:5000/reviews/add`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              uid: parseInt(userId),
+              mid: this.movieId,
+              comment: this.newReview.text,
+              rating: this.newReview.rating,
+            }),
+          });
+
+          if (response.ok) {
+            const newReview = await response.json();
+            this.reviews.push(newReview); // Dynamically add the new review to the list
+            this.newReview.text = ""; // Clear the text box
+            this.newReview.rating = 0; // Reset the rating
+            this.hasLeftReview = true;
+            this.fetchReviews(); // Refresh reviews to ensure consistency
+          } else {
+            console.error("Failed to submit review.");
+          }
+        } catch (error) {
+          console.error("Error submitting review:", error);
+        }
+      },
     },
-  },
-};
+  };
 </script>
+  
+  <style scoped>
+  .review-date {
+    font-size: 0.9rem;
+    color: gray;
+  }
+  
+  .user-link {
+    color: black;
+  }
 
-<style scoped>
-.simpleBox {
-  display: inline-block;
-  margin-left: 0.5rem;
-}
-
-.yellowStar {
-  color: gold;
-}
-
-textarea {
-  width: 100%;
-  height: 100px;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none;
-}
-
-select {
-  margin-bottom: 1rem;
-}
-
-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  font-size: 1rem;
-  border-radius: 5px;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-.vote-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  border-radius: 3px;
-  margin-right: 0.5rem;
-}
-
-.vote-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.review-date {
-  color: #666;
-  font-size: 0.8rem;
-}
-
-.vote-section {
-  display: flex;
-  align-items: center;
-  margin-top: 0.5rem;
-}
-
-.net-votes {
-  margin: 0 0.5rem;
-  font-weight: bold;
-  font-size: 1rem;
-  color: #333;
-}
-
-.vote-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  border-radius: 3px;
-}
-
-.vote-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-</style>
+  .simpleBox {
+    display: inline-block;
+    margin-left: 0.5rem;
+  }
+  
+  .yellowStar {
+    color: gold;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+  }
+  
+  select {
+    margin-bottom: 1rem;
+  }
+  
+  button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 5px;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  </style>
+  

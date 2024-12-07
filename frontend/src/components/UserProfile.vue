@@ -124,9 +124,9 @@
     color: gray;
   }
 
-  .user-profile-page {
+  /* .user-profile-page {
     padding: 1rem;
-  }
+  } */
   
   .profile-container {
     margin: 2rem;
