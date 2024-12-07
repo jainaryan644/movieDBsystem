@@ -27,7 +27,7 @@
       <li v-for="review in reviews" :key="review.rid">
         <div>
           <b>
-            <router-link :to="'/users/' + review.username" class="username">
+            <router-link :to="'/profile/' + review.uid" class="username">
               {{ review.username }}
             </router-link>
           </b>

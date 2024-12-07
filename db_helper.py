@@ -1,13 +1,13 @@
 import datetime
 from datetime import date
-import psycopg2
-from psycopg2 import sql
+import psycopg
+from psycopg import sql
 import hashlib
 import configparser
 import csv
 
 DB_CONFIG = {
-    "database": "your_database_name",
+    "dbname": "mdb_412",
     "user": "postgres",
     "password": "password",
     "host": "localhost",  # or your database host
@@ -16,9 +16,9 @@ DB_CONFIG = {
 
 def get_db_connection():
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
+        conn = psycopg.connect(**DB_CONFIG)
         return conn
-    except psycopg2.Error as e:
+    except psycopg.Error as e:
         print(f"Error connecting to database: {e}")
         raise e
 
